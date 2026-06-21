@@ -1,0 +1,13 @@
+<library path="odri_forward_command_controller">
+  <class
+    name="odri_forward_command_controller/OdriForwardCommandController"
+    type="odri_forward_command_controller::OdriForwardCommandController"
+    base_class_type="controller_interface::ControllerInterface">
+    <description>
+      Forward command controller for ODRI joints. Sends position, velocity,
+      effort, gain_kp and gain_kd commands together via a single topic using
+      OdriJointCommand messages. Per-field NaN values are skipped so partial
+      updates are supported.
+    </description>
+  </class>
+</library>

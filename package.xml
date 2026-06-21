@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>odri_forward_command_controller</name>
+  <version>0.1.0</version>
+  <description>
+    Forward command controller for ODRI joints that sends position, velocity,
+    effort, gain_kp and gain_kd commands together via a single topic using
+    std_msgs/Float64MultiArray. The flat data array is ordered as:
+    [pos×n | vel×n | eff×n | gain_kp×n | gain_kd×n] for n joints.
+    Per-value NaN entries are silently skipped for partial updates.
+  </description>
+
+  <maintainer email="olivier.stasse@laas.fr">Olivier Stasse</maintainer>
+  <license>Apache License 2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>controller_interface</depend>
+  <depend>generate_parameter_library</depend>
+  <depend>hardware_interface</depend>
+  <depend>pluginlib</depend>
+  <depend>rclcpp</depend>
+  <depend>rclcpp_lifecycle</depend>
+  <depend>realtime_tools</depend>
+  <depend>std_msgs</depend>
+
+  <test_depend>ament_cmake_gmock</test_depend>
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
