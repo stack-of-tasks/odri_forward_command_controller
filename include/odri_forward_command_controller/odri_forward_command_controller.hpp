@@ -29,12 +29,12 @@
 #include "realtime_tools/realtime_thread_safe_box.hpp"
 #include "std_msgs/msg/float64_multi_array.hpp"
 
-namespace odri_forward_command_controller
-{
+namespace odri_forward_command_controller {
 
 // Reuse the same CmdType convention as forward_command_controller.
-// The flat data array is ordered as: [pos×n | vel×n | eff×n | gain_kp×n | gain_kd×n]
-// for n joints. Per-value NaN entries are silently skipped (partial updates).
+// The flat data array is ordered as: [pos×n | vel×n | eff×n | gain_kp×n |
+// gain_kd×n] for n joints. Per-value NaN entries are silently skipped (partial
+// updates).
 using CmdType = std_msgs::msg::Float64MultiArray;
 
 /**
@@ -59,31 +59,34 @@ using CmdType = std_msgs::msg::Float64MultiArray;
  * Subscribes to:
  * - \b commands (std_msgs::msg::Float64MultiArray)
  */
-class OdriForwardCommandController : public controller_interface::ControllerInterface
-{
-public:
+class OdriForwardCommandController
+    : public controller_interface::ControllerInterface {
+ public:
   OdriForwardCommandController();
 
-  controller_interface::InterfaceConfiguration command_interface_configuration() const override;
+  controller_interface::InterfaceConfiguration command_interface_configuration()
+      const override;
 
-  controller_interface::InterfaceConfiguration state_interface_configuration() const override;
+  controller_interface::InterfaceConfiguration state_interface_configuration()
+      const override;
 
   controller_interface::CallbackReturn on_init() override;
 
   controller_interface::CallbackReturn on_configure(
-    const rclcpp_lifecycle::State & previous_state) override;
+      const rclcpp_lifecycle::State& previous_state) override;
 
   controller_interface::CallbackReturn on_activate(
-    const rclcpp_lifecycle::State & previous_state) override;
+      const rclcpp_lifecycle::State& previous_state) override;
 
   controller_interface::CallbackReturn on_deactivate(
-    const rclcpp_lifecycle::State & previous_state) override;
+      const rclcpp_lifecycle::State& previous_state) override;
 
   controller_interface::return_type update(
-    const rclcpp::Time & time, const rclcpp::Duration & period) override;
+      const rclcpp::Time& time, const rclcpp::Duration& period) override;
 
-protected:
-  using LoanedRef = std::reference_wrapper<hardware_interface::LoanedCommandInterface>;
+ protected:
+  using LoanedRef =
+      std::reference_wrapper<hardware_interface::LoanedCommandInterface>;
 
   std::vector<std::string> joint_names_;
 
@@ -94,7 +97,8 @@ protected:
   std::vector<std::string> kp_interface_names_;
   std::vector<std::string> kd_interface_names_;
 
-  // per-type ordered references (populated in on_activate, cleared in on_deactivate)
+  // per-type ordered references (populated in on_activate, cleared in
+  // on_deactivate)
   std::vector<LoanedRef> pos_interfaces_;
   std::vector<LoanedRef> vel_interfaces_;
   std::vector<LoanedRef> eff_interfaces_;
@@ -106,7 +110,7 @@ protected:
 
   rclcpp::Subscription<CmdType>::SharedPtr joints_command_subscriber_;
 
-private:
+ private:
   std::shared_ptr<ParamListener> param_listener_;
   Params params_;
 };

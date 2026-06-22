@@ -35,24 +35,24 @@ using controller_interface::deactivate_succeeds;
 using hardware_interface::CommandInterface;
 using hardware_interface::LoanedCommandInterface;
 
-static constexpr const char * HW_IF_GAIN_KP = "gain_kp";
-static constexpr const char * HW_IF_GAIN_KD = "gain_kd";
+static constexpr const char* HW_IF_GAIN_KP = "gain_kp";
+static constexpr const char* HW_IF_GAIN_KD = "gain_kd";
 
-// Re-exports protected members as public so tests can inject commands and inspect state.
-class FriendController : public odri_forward_command_controller::OdriForwardCommandController
-{
-public:
-  using OdriForwardCommandController::rt_command_;
-  using OdriForwardCommandController::pos_interfaces_;
-  using OdriForwardCommandController::vel_interfaces_;
+// Re-exports protected members as public so tests can inject commands and
+// inspect state.
+class FriendController
+    : public odri_forward_command_controller::OdriForwardCommandController {
+ public:
   using OdriForwardCommandController::eff_interfaces_;
-  using OdriForwardCommandController::kp_interfaces_;
   using OdriForwardCommandController::kd_interfaces_;
+  using OdriForwardCommandController::kp_interfaces_;
+  using OdriForwardCommandController::pos_interfaces_;
+  using OdriForwardCommandController::rt_command_;
+  using OdriForwardCommandController::vel_interfaces_;
 };
 
-class OdriForwardCommandControllerTest : public ::testing::Test
-{
-public:
+class OdriForwardCommandControllerTest : public ::testing::Test {
+ public:
   static void SetUpTestCase() { rclcpp::init(0, nullptr); }
   static void TearDownTestCase() { rclcpp::shutdown(); }
 
@@ -60,9 +60,9 @@ public:
   void TearDown() { controller_.reset(); }
 
   // Initialise controller and wire up all 5 command interfaces per joint.
-  // joints is passed via node_options so generate_parameter_library sees it at init time.
-  void SetUpController(const std::vector<std::string> & joints = {"j1", "j2"})
-  {
+  // joints is passed via node_options so generate_parameter_library sees it at
+  // init time.
+  void SetUpController(const std::vector<std::string>& joints = {"j1", "j2"}) {
     controller_interface::ControllerInterfaceParams params;
     params.controller_name = "odri_forward_command_controller";
     params.robot_description = "";
@@ -88,32 +88,40 @@ public:
     executor_.add_node(controller_->get_node()->get_node_base_interface());
   }
 
-protected:
+ protected:
   std::unique_ptr<FriendController> controller_;
   rclcpp::executors::SingleThreadedExecutor executor_;
 
   // backing storage — two joints
-  double j1_pos_val_{0.0}, j1_vel_val_{0.0}, j1_eff_val_{0.0}, j1_kp_val_{0.0}, j1_kd_val_{0.0};
-  double j2_pos_val_{0.0}, j2_vel_val_{0.0}, j2_eff_val_{0.0}, j2_kp_val_{0.0}, j2_kd_val_{0.0};
+  double j1_pos_val_{0.0}, j1_vel_val_{0.0}, j1_eff_val_{0.0}, j1_kp_val_{0.0},
+      j1_kd_val_{0.0};
+  double j2_pos_val_{0.0}, j2_vel_val_{0.0}, j2_eff_val_{0.0}, j2_kp_val_{0.0},
+      j2_kd_val_{0.0};
 
-  // Named CommandInterface objects (LoanedCommandInterface requires non-const lvalue ref)
-  CommandInterface j1_pos_{"j1", hardware_interface::HW_IF_POSITION, &j1_pos_val_};
-  CommandInterface j1_vel_{"j1", hardware_interface::HW_IF_VELOCITY, &j1_vel_val_};
-  CommandInterface j1_eff_{"j1", hardware_interface::HW_IF_EFFORT, &j1_eff_val_};
+  // Named CommandInterface objects (LoanedCommandInterface requires non-const
+  // lvalue ref)
+  CommandInterface j1_pos_{"j1", hardware_interface::HW_IF_POSITION,
+                           &j1_pos_val_};
+  CommandInterface j1_vel_{"j1", hardware_interface::HW_IF_VELOCITY,
+                           &j1_vel_val_};
+  CommandInterface j1_eff_{"j1", hardware_interface::HW_IF_EFFORT,
+                           &j1_eff_val_};
   CommandInterface j1_kp_{"j1", HW_IF_GAIN_KP, &j1_kp_val_};
   CommandInterface j1_kd_{"j1", HW_IF_GAIN_KD, &j1_kd_val_};
 
-  CommandInterface j2_pos_{"j2", hardware_interface::HW_IF_POSITION, &j2_pos_val_};
-  CommandInterface j2_vel_{"j2", hardware_interface::HW_IF_VELOCITY, &j2_vel_val_};
-  CommandInterface j2_eff_{"j2", hardware_interface::HW_IF_EFFORT, &j2_eff_val_};
+  CommandInterface j2_pos_{"j2", hardware_interface::HW_IF_POSITION,
+                           &j2_pos_val_};
+  CommandInterface j2_vel_{"j2", hardware_interface::HW_IF_VELOCITY,
+                           &j2_vel_val_};
+  CommandInterface j2_eff_{"j2", hardware_interface::HW_IF_EFFORT,
+                           &j2_eff_val_};
   CommandInterface j2_kp_{"j2", HW_IF_GAIN_KP, &j2_kp_val_};
   CommandInterface j2_kd_{"j2", HW_IF_GAIN_KD, &j2_kd_val_};
 };
 
 // ---------------------------------------------------------------------------
 
-TEST_F(OdriForwardCommandControllerTest, JointsParamMissing)
-{
+TEST_F(OdriForwardCommandControllerTest, JointsParamMissing) {
   // Init with empty joints (default) — configure must fail
   controller_interface::ControllerInterfaceParams params;
   params.controller_name = "odri_forward_command_controller";
@@ -125,47 +133,44 @@ TEST_F(OdriForwardCommandControllerTest, JointsParamMissing)
   EXPECT_FALSE(configure_succeeds(controller_));
 }
 
-TEST_F(OdriForwardCommandControllerTest, ConfigureSuccess)
-{
+TEST_F(OdriForwardCommandControllerTest, ConfigureSuccess) {
   SetUpController();
   EXPECT_TRUE(configure_succeeds(controller_));
 }
 
-TEST_F(OdriForwardCommandControllerTest, ActivateSuccess)
-{
+TEST_F(OdriForwardCommandControllerTest, ActivateSuccess) {
   SetUpController();
   ASSERT_TRUE(configure_succeeds(controller_));
   EXPECT_TRUE(activate_succeeds(controller_));
 }
 
-TEST_F(OdriForwardCommandControllerTest, ActivateWrongJointFails)
-{
+TEST_F(OdriForwardCommandControllerTest, ActivateWrongJointFails) {
   // Controller configured for j1/j_wrong, but hardware only exposes j1/j2.
-  // on_activate returns ERROR → lifecycle transitions to unconfigured/finalized,
-  // so activate_succeeds throws rather than returning false.
+  // on_activate returns ERROR → lifecycle transitions to
+  // unconfigured/finalized, so activate_succeeds throws rather than returning
+  // false.
   SetUpController({"j1", "j_wrong"});
   ASSERT_TRUE(configure_succeeds(controller_));
   EXPECT_THROW(activate_succeeds(controller_), std::runtime_error);
 }
 
-TEST_F(OdriForwardCommandControllerTest, CommandForwardedCorrectly)
-{
+TEST_F(OdriForwardCommandControllerTest, CommandForwardedCorrectly) {
   SetUpController();
   ASSERT_TRUE(configure_succeeds(controller_));
   ASSERT_TRUE(activate_succeeds(controller_));
 
   // data layout: [pos×2 | vel×2 | eff×2 | kp×2 | kd×2]
   std_msgs::msg::Float64MultiArray cmd;
-  cmd.data = {1.0, 2.0,    // positions  j1, j2
-              0.1, 0.2,    // velocities j1, j2
+  cmd.data = {1.0,  2.0,   // positions  j1, j2
+              0.1,  0.2,   // velocities j1, j2
               10.0, 20.0,  // efforts    j1, j2
-              5.0, 6.0,    // gains_kp   j1, j2
-              0.5, 0.6};   // gains_kd   j1, j2
+              5.0,  6.0,   // gains_kp   j1, j2
+              0.5,  0.6};  // gains_kd   j1, j2
 
   controller_->rt_command_.set(cmd);
   EXPECT_EQ(
-    controller_->update(rclcpp::Time{}, rclcpp::Duration::from_seconds(0.01)),
-    controller_interface::return_type::OK);
+      controller_->update(rclcpp::Time{}, rclcpp::Duration::from_seconds(0.01)),
+      controller_interface::return_type::OK);
 
   EXPECT_DOUBLE_EQ(j1_pos_val_, 1.0);
   EXPECT_DOUBLE_EQ(j2_pos_val_, 2.0);
@@ -179,8 +184,7 @@ TEST_F(OdriForwardCommandControllerTest, CommandForwardedCorrectly)
   EXPECT_DOUBLE_EQ(j2_kd_val_, 0.6);
 }
 
-TEST_F(OdriForwardCommandControllerTest, NaNSkipped)
-{
+TEST_F(OdriForwardCommandControllerTest, NaNSkipped) {
   SetUpController();
   ASSERT_TRUE(configure_succeeds(controller_));
   ASSERT_TRUE(activate_succeeds(controller_));
@@ -208,8 +212,7 @@ TEST_F(OdriForwardCommandControllerTest, NaNSkipped)
   EXPECT_DOUBLE_EQ(j2_kp_val_, 8.0);
 }
 
-TEST_F(OdriForwardCommandControllerTest, WrongSizeIgnored)
-{
+TEST_F(OdriForwardCommandControllerTest, WrongSizeIgnored) {
   SetUpController();
   ASSERT_TRUE(configure_succeeds(controller_));
   ASSERT_TRUE(activate_succeeds(controller_));
@@ -228,8 +231,7 @@ TEST_F(OdriForwardCommandControllerTest, WrongSizeIgnored)
   EXPECT_DOUBLE_EQ(j2_pos_val_, 66.0);  // untouched
 }
 
-TEST_F(OdriForwardCommandControllerTest, DeactivateClearsInterfaces)
-{
+TEST_F(OdriForwardCommandControllerTest, DeactivateClearsInterfaces) {
   SetUpController();
   ASSERT_TRUE(configure_succeeds(controller_));
   ASSERT_TRUE(activate_succeeds(controller_));
